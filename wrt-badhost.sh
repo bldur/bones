@@ -137,6 +137,9 @@ https://lists.blocklist.de/lists/22.txt
 https://lists.blocklist.de/lists/ssh.txt
 https://lists.blocklist.de/lists/bruteforcelogin.txt
 https://www.blocklist.de/downloads/export-ips_all.txt
+https://www.spamhaus.org/drop/dropv6.txt
+https://www.spamhaus.org/drop/drop.txt
+https://www.spamhaus.org/drop/edrop.txt
 "
 
 # create set to contain ip addresses
