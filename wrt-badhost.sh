@@ -3,6 +3,11 @@
 set -x
 
 # IP blacklisting script for openwrt nftables
+# started with a openwrt forum script.
+# mangled with and made into an unreadable mess using following sources with least effort:
+# https://www.unix.com/shell-programming-and-scripting/233825-convert-ip-ranges-cidr-netblocks.html
+# https://www.geoghegan.ca/pfbadhost.html
+# copyleft, restrictions from above sources may apply.
 
 GAWK_CIDR32() {
 gawk --source='
@@ -120,9 +125,7 @@ $1!=$2{print range2cidr(ip2dec($1), ip2dec($2))}
 '
 }
 
-# bogons
-# Emerging Threats lists 
-# Blocklist.de 
+# some blocklists 
 URLS="
 https://rules.emergingthreats.net/fwrules/emerging-Block-IPs.txt
 https://rules.emergingthreats.net/blockrules/compromised-ips.txt
@@ -152,8 +155,6 @@ fi
 
 # temp filename
 blocklist=$(mktemp)
-#ip4_list=$(mktemp)
-#ip6_list=$(mktemp)
 
 # add new elements to the set
 for url in $URLS; do
@@ -168,28 +169,20 @@ done | grep -v ^# | grep -v ^$ > "${blocklist}"
 nft flush set inet fw4 blackhole
 
 # create ipv4 block rules
-#grep -v : "${blocklist}" | while read line; do
 # replace with matching
-grep -E -o -- '((25[0-5]|(2[0-4]|1{0,1}[[:digit:]]){0,1}[[:digit:]])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[[:digit:]]){0,1}[[:digit:]])(/(3[0-2]|[1-2][[:digit:]]|[1-9]))?' "${blocklist}" | GAWK_CIDR32 | awk -v RS="" '{gsub (/\n/,", ")}1' | sort -u | while read line; do
-#  echo add element inet fw4 blackhole "{ $line }"
-#done | nft -f -
-  echo $line
-done | cat > ip4_list
+grep -E -o -- '((25[0-5]|(2[0-4]|1{0,1}[[:digit:]]){0,1}[[:digit:]])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[[:digit:]]){0,1}[[:digit:]])(/(3[0-2]|[1-2][[:digit:]]|[1-9]))?' "${blocklist}" | sort -u | GAWK_CIDR32 | awk -v RS="" '{gsub (/\n/,", ")}1' | while read line; do
+  echo add element inet fw4 blackhole "{ $line }"
+done | nft -f -
 
 # clear old ipv6
 nft flush set inet fw4 blackhole6
 
 # create ipv6 block rules
-#grep : "${blocklist}" | while read line; do
 # replace with matching
 grep -E  -v -- '^#|^;|^[[:space:]]*#|^[[:space:]]*;|^[[:space:]]*$' "${blocklist}" | gawk -- '{print $1}' | sort -u | grep -E -x -- '(([[:xdigit:]]{1,4}:){7,7}[[:xdigit:]]{1,4}|([[:xdigit:]]{1,4}:){1,7}:|([[:xdigit:]]{1,4}:){1,6}:[[:xdigit:]]{1,4}|([[:xdigit:]]{1,4}:){1,5}(:[[:xdigit:]]{1,4}){1,2}|([[:xdigit:]]{1,4}:){1,4}(:[[:xdigit:]]{1,4}){1,3}|([[:xdigit:]]{1,4}:){1,3}(:[[:xdigit:]]{1,4}){1,4}|([[:xdigit:]]{1,4}:){1,2}(:[[:xdigit:]]{1,4}){1,5}|[[:xdigit:]]{1,4}:((:[[:xdigit:]]{1,4}){1,6})|:((:[[:xdigit:]]{1,4}){1,7}|:)|[fF][eE]80:(:[[:xdigit:]]{0,4}){0,4}%[[:alnum:]]{1,}|::([fF]{4}(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[[:digit:]]){0,1}[[:digit:]])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[[:digit:]]){0,1}[[:digit:]])|([[:xdigit:]]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[[:digit:]]){0,1}[[:digit:]])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[[:digit:]]){0,1}[[:digit:]]))(/(12[0-8]|1[0-1][[:digit:]]|[1-9][[:digit:]]{0,1}))?' | while read line; do
-#  echo add element inet fw4 blackhole6 { $line }
-#done | nft -f -
-#test
-  echo $line
-done | cat > ip6_list
+  echo add element inet fw4 blackhole6 { $line }
+done | nft -f -
 
 # cleanup
-#rm "${blocklist}"
-#rm "${ip4_list}" "${ip6_list}"
+rm "${blocklist}"
 
