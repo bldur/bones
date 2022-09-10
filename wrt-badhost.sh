@@ -1,7 +1,5 @@
 #!/bin/sh
 
-set -x
-
 # IP blacklisting script for openwrt nftables
 # started with a openwrt forum script.
 # mangled with and made into an unreadable mess using following sources with least effort:
