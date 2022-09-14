@@ -116,7 +116,7 @@ BEGIN{
 {$1 = sanitize($1); $2 = sanitize($2)}
 
 # range with a single IP
-$1==$2 {printf "-A single %s\n", $1} 
+#$1==$2 {printf "-A single %s\n", $1} 
 
 # ranges with multiple IPs
 $1!=$2{print range2cidr(ip2dec($1), ip2dec($2))}
