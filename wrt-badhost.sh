@@ -407,4 +407,6 @@ done
 #nft add element inet fw4 blackhole6 { $NFT_ADD_IPV6 }
 #nft del element inet fw4 blackhole6 { $NFT_DEL_IPV6 }
 
+rm -rf /tmp/badhost
+
 # done!
