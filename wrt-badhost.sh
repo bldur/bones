@@ -262,24 +262,25 @@ GREP_IPV4_RANGE_NO_CIDR() {
 # some blocklists 
 URLS="
 https://www.team-cymru.org/Services/Bogons/bogon-bn-nonagg.txt
-http://rules.emergingthreats.net/fwrules/emerging-Block-IPs.txt
+https://rules.emergingthreats.net/fwrules/emerging-Block-IPs.txt
 https://www.blocklist.de/downloads/export-ips_all.txt
+
+https://rules.emergingthreats.net/fwrules/emerging-Block-IPs.txt
+https://rules.emergingthreats.net/blockrules/compromised-ips.txt
+https://www.binarydefense.com/banlist.txt
+https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level1.netset
+https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level2.netset
+https://isc.sans.edu/api/threatlist/shodan/?text
+https://feodotracker.abuse.ch/downloads/ipblocklist.txt
+https://sslbl.abuse.ch/blacklist/sslipblacklist.txt
+https://www.spamhaus.org/drop/dropv6.txt
+https://www.spamhaus.org/drop/drop.txt
+https://www.spamhaus.org/drop/edrop.txt
+https://www.stopforumspam.com/downloads/toxic_ip_cidr.txt
+https://www.stopforumspam.com/downloads/listed_ip_1_ipv46.gz
+https://ozgur.kazancci.com/ban-me.txt
+https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level3.netset
 "
-#https://rules.emergingthreats.net/fwrules/emerging-Block-IPs.txt
-#https://rules.emergingthreats.net/blockrules/compromised-ips.txt
-#https://www.binarydefense.com/banlist.txt
-#https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level1.netset
-#https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level2.netset
-#https://isc.sans.edu/api/threatlist/shodan/?text
-#https://feodotracker.abuse.ch/downloads/ipblocklist.txt
-#https://sslbl.abuse.ch/blacklist/sslipblacklist.txt
-#https://www.spamhaus.org/drop/dropv6.txt
-#https://www.spamhaus.org/drop/drop.txt
-#https://www.spamhaus.org/drop/edrop.txt
-#https://www.stopforumspam.com/downloads/toxic_ip_cidr.txt
-#https://www.stopforumspam.com/downloads/listed_ip_1_ipv46.gz
-#https://ozgur.kazancci.com/ban-me.txt
-#https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level3.netset
 
 # create set to contain ip addresses
 if ! nft list set inet fw4 blackhole6 > /dev/null 2> /dev/null; then
@@ -407,6 +408,6 @@ done
 #nft add element inet fw4 blackhole6 { $NFT_ADD_IPV6 }
 #nft del element inet fw4 blackhole6 { $NFT_DEL_IPV6 }
 
-rm -rf /tmp/badhost
+#rm -rf /tmp/badhost
 
 # done!
