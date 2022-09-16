@@ -5,6 +5,7 @@ This is just a mess of with reasonable regex, two awk programs mangled coaxed to
 AWK programs taken from UNIX.com and regex from pf-badhost and another from oreilly.com.
 
 Function to batch process lines with while loops from stackexchange or overflow.
+So mostly combining and finding the simple, dumb, old and reasonably fast.
 
 Easy to adapt and change, as there is no "meat", just basic functionality bones.
 Where perhaps only IPv4 is useful for public blocklists.
