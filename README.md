@@ -4,6 +4,8 @@
 This is just a mess of with reasonable regex, two awk programs mangled coaxed to work.
 AWK programs taken from UNIX.com and regex from pf-badhost and another from oreilly.com.
 
+Function to batch process lines with while loops from stackexchange or overflow.
+
 Easy to adapt and change, as there is no "meat", just basic functionality bones.
 Where perhaps only IPv4 is useful for public blocklists.
 A missing feature is whitelisting, which grep -vf file1 downloaded_lists_parsed could do.
