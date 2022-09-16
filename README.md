@@ -26,3 +26,11 @@ Created a diff of NFT ipset and compared.
 Adding 50 IP's to the set, and removing 0, as none had been removed since last download.
 
 And empty blocklist file is the same as removing or flushing the ipset.
+
+# puzzling intermittently
+
+Haven't myself tested just giving it various /24 to properly test everything involved
+and what it does with /8 apart from noticing that it is not quite right and for ipv4 ipset
+with interval flag turned on and not stripping this.
+
+It moves away from greedily catch-all where perhaps various service specific blocklists for log spam.
