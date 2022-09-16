@@ -2,6 +2,7 @@
 # scripts and no fresh meat
 
 This is just a mess of with reasonable regex, two awk programs mangled coaxed to work.
+AWK programs taken from UNIX.com and regex from pf-badhost and another from oreilly.com.
 
 Easy to adapt and change, as there is no "meat", just basic functionality bones.
 
