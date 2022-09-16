@@ -3,23 +3,15 @@
 
 This is just a mess of with reasonable regex, two awk programs that are useful and link.
 
-# time sh wrt-badhost.sh 2>wrt.log
+# time sh wrt-badhost.sh
 
-real	1m6.613s
-user	0m39.809s
-sys	0m11.373s
+real	0m35.103s
+user	0m27.306s
+sys	0m5.850s
 
-/tmp/badhost# wc -l blocklist_ipv4.jiaAej 
-47767 blocklist_ipv4.jiaAej
+Here it downloaded 644 KB blocklist text involving 37119 IPv4 addresses.
+Created a diff of NFT ipset and compared.
 
-without downloading it's below 30 seconds and works with openwrt 22.03.
-creating a diff prefixed with add and delete from processing
-output of nft list and downloaded blocklists.
+Adding 50 IP's to the set, and removing 0, as none had been removed since last download.
 
-so just sharing the mess using awk, sort, diff and grep and doesn't do nft flush
-and don't get collision when adding and deleting ip's.
-
-May not be catching all CIDR ip's and expanding them to single ip's fully.
-A separate ipset would bee better for CIDR addresses due to interval shenanigans.
-
-Also batching addition and deletion to ipset to avoid a list length limit.
+And empty blocklist file is the same as removing or flushing the ipset.
