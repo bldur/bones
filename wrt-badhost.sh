@@ -222,7 +222,7 @@ GREP_V_COM() {
 }
 #| awk -- '{print $1}' | sort -u |
 GREP_IPV6() {
-	awk -- '{print $1}' | grep -E -x -- '(([[:xdigit:]]{1,4}:){7,7}[[:xdigit:]]{1,4}|([[:xdigit:]]{1,4}:){1,7}:|([[:xdigit:]]{1,4}:){1,6}:[[:xdigit:]]{1,4}|([[:xdigit:]]{1,4}:){1,5}(:[[:xdigit:]]{1,4}){1,2}|([[:xdigit:]]{1,4}:){1,4}(:[[:xdigit:]]{1,4}){1,3}|([[:xdigit:]]{1,4}:){1,3}(:[[:xdigit:]]{1,4}){1,4}|([[:xdigit:]]{1,4}:){1,2}(:[[:xdigit:]]{1,4}){1,5}|[[:xdigit:]]{1,4}:((:[[:xdigit:]]{1,4}){1,6})|:((:[[:xdigit:]]{1,4}){1,7}|:)|[fF][eE]80:(:[[:xdigit:]]{0,4}){0,4}%[[:alnum:]]{1,}|::([fF]{4}(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[[:digit:]]){0,1}[[:digit:]])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[[:digit:]]){0,1}[[:digit:]])|([[:xdigit:]]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[[:digit:]]){0,1}[[:digit:]])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[[:digit:]]){0,1}[[:digit:]]))(/(12[0-8]|1[0-1][[:digit:]]|[1-9][[:digit:]]{0,1}))?'
+	grep -E -x -- '(([[:xdigit:]]{1,4}:){7,7}[[:xdigit:]]{1,4}|([[:xdigit:]]{1,4}:){1,7}:|([[:xdigit:]]{1,4}:){1,6}:[[:xdigit:]]{1,4}|([[:xdigit:]]{1,4}:){1,5}(:[[:xdigit:]]{1,4}){1,2}|([[:xdigit:]]{1,4}:){1,4}(:[[:xdigit:]]{1,4}){1,3}|([[:xdigit:]]{1,4}:){1,3}(:[[:xdigit:]]{1,4}){1,4}|([[:xdigit:]]{1,4}:){1,2}(:[[:xdigit:]]{1,4}){1,5}|[[:xdigit:]]{1,4}:((:[[:xdigit:]]{1,4}){1,6})|:((:[[:xdigit:]]{1,4}){1,7}|:)|[fF][eE]80:(:[[:xdigit:]]{0,4}){0,4}%[[:alnum:]]{1,}|::([fF]{4}(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[[:digit:]]){0,1}[[:digit:]])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[[:digit:]]){0,1}[[:digit:]])|([[:xdigit:]]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[[:digit:]]){0,1}[[:digit:]])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[[:digit:]]){0,1}[[:digit:]]))(/(12[0-8]|1[0-1][[:digit:]]|[1-9][[:digit:]]{0,1}))?'
 }
 
 DIFFER() {
@@ -290,11 +290,11 @@ https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level3
 # create set to contain ip addresses
 if ! nft list set inet fw4 blackhole6 > /dev/null 2> /dev/null; then
   nft add set inet fw4 blackhole { type ipv4_addr\; }
-  nft add set inet fw4 blackhole6 { type ipv6_addr\; interval\; }
+  nft add set inet fw4 blackhole6 { type ipv6_addr\; flags interval\; }
 fi
 
 # insert chain to drop where source address in blackhole set
-if ! nft list chain inet fw4 input_wan > /dev/null 2> /dev/null; then
+if ! nft list chain inet fw4 input_wan | grep -q blackhole; then
   nft insert rule inet fw4 input_wan ip saddr @blackhole drop
   nft insert rule inet fw4 input_wan ip6 saddr @blackhole6 drop
 fi
@@ -331,11 +331,11 @@ done  > "${blocklist}"
 #nft list set inet fw4 blackhole  > "${nft_ipv4}"
 #cat "${nft_ipv4}" | GREP_IPV4 | AWK_CIDR32 | GREP_IPV4_NO_CIDR | sort -u > "${nft_ipv4_list}"
 nft list set inet fw4 blackhole | GREP_IPV4 | sort -u > "${nft_ipv4_list}"
-nft list set inet fw4 blackhole6 | GREP_IPV6 | sort -u > "${nft_ipv6_list}"
+nft list set inet fw4 blackhole6 | GREP_V_COM | awk '$1=$1' RS="," OFS="\n" | GREP_IPV6 | sort -u > "${nft_ipv6_list}"
 
 # same from downloaded raw file
 cat "${blocklist}" | GREP_IPV4 | AWK_CIDR32 | GREP_IPV4_NO_CIDR | sort -u > "${blocklist_ipv4}"
-cat "${blocklist}" | GREP_V_COM | GREP_IPV6 | sort -u > "${blocklist_ipv6}"
+cat "${blocklist}" | GREP_V_COM | awk -- '{print $1}' | GREP_IPV6 | sort -u > "${blocklist_ipv6}"
 
 # make a new file with diff, "add ip" and "delete ip", one line per ip with diff
 DIFFER "${nft_ipv4_list}" "${blocklist_ipv4}" | sort -u > "${diff_add_del_ipv4}";
