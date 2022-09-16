@@ -1,8 +1,8 @@
 #!/bin/sh
 
-LC_ALL=C
+#LC_ALL=C
 
-set -x
+#set -x
 
 # IP blacklisting script for openwrt nftables
 # started with a openwrt forum script.
@@ -10,6 +10,8 @@ set -x
 # https://www.unix.com/shell-programming-and-scripting/233825-convert-ip-ranges-cidr-netblocks.html
 # https://www.geoghegan.ca/pfbadhost.html
 # copyleft, restrictions from above sources may apply.
+
+# scroll past useful functions and awk programs merely mangled and not written.
 
 AWK_CIDR32() {
 awk -e '
