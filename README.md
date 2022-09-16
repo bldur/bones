@@ -5,6 +5,9 @@ This is just a mess of with reasonable regex, two awk programs mangled coaxed to
 
 Easy to adapt and change, as there is no "meat", just basic functionality bones.
 
+Focus is on greedily coaxing and forcing individual ip's in the blocklist.
+If it can't convert a CIDR /32 all /xx are stripped.
+
 
 On ARM64 Cortex 72A clocked to 1Ghz.
 
