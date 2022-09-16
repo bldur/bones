@@ -1,7 +1,12 @@
 # bones
 # scripts and no fresh meat
 
-This is just a mess of with reasonable regex, two awk programs that are useful and link.
+This is just a mess of with reasonable regex, two awk programs mangled coaxed to work.
+
+Easy to adapt and change, as there is no "meat", just basic functionality bones.
+
+
+On ARM64 Cortex 72A clocked to 1Ghz.
 
 # time sh wrt-badhost.sh
 
