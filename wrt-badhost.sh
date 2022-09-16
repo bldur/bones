@@ -294,13 +294,13 @@ if ! nft list set inet fw4 blackhole6 > /dev/null 2> /dev/null; then
 fi
 
 # insert chain to drop where source address in blackhole set
-if ! nft list chain inet fw4 input_wan > /dev/null 2> /dev/null | grep @blackhole6; then
+if ! nft list chain inet fw4 input_wan > /dev/null 2> /dev/null; then
   nft insert rule inet fw4 input_wan ip saddr @blackhole drop
   nft insert rule inet fw4 input_wan ip6 saddr @blackhole6 drop
 fi
 
 # temp folder and keep a few days
-export TMPDIR="/tmp/badhost"
+export TMPDIR="/tmp/badhost/wrk"
 mkdir -p $TMPDIR
 #find $TMPDIR -type f -mtime +2 -delete
 
@@ -368,7 +368,10 @@ grep delete "${diff_add_del_ipv6}" | cut -d ' ' -f 2 | while batch=$(readlines 1
         done
 done
 
-if [ "$TMPDIR" = "/tmp/badhost" ]; then
+# keep the last raw blocklist
+gzip -9n "${blocklist}" -c > /tmp//badhost/last_raw_blocklist.gz
+
+if [ "$TMPDIR" = "/tmp/badhost/wrk" ]; then
 	rm -rf $TMPDIR
 fi
 #rm -rf /tmp/badhost
