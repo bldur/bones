@@ -2,11 +2,12 @@
 # scripts and no fresh meat
 
 Told runtime for VoIPBL voipbl.org/ on i5 is 7 seconds on openwrt 22.03 using nft.
+Works such that giving it a blank blocklist will remove all ip's from the ipset.
 
-This is just a mess of with reasonable regex, two awk programs mangled coaxed to work.
+This is just a mess of with reasonable regex, two awk programs mangled to work.
 AWK programs taken from UNIX.com and regex from pf-badhost and another from oreilly.com.
 
-Function to batch process lines with while loops from stackexchange or overflow.
+Function to batch process from stackexchange, etc.
 So mostly combining and finding the simple, dumb, old and reasonably fast.
 
 Easy to adapt and change, as there is no "meat", just basic functionality bones.
