@@ -1,6 +1,8 @@
 # bones
 # scripts and no fresh meat
 
+Told runtime for VoIPBL voipbl.org/ on i5 is 7 seconds on openwrt 22.03 using nft.
+
 This is just a mess of with reasonable regex, two awk programs mangled coaxed to work.
 AWK programs taken from UNIX.com and regex from pf-badhost and another from oreilly.com.
 
