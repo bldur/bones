@@ -1,6 +1,16 @@
 # bones
 # scripts and no fresh meat
 
+Awk needs to be shafted unless someone that knows awk well write up.
+
+These two programs:
+https://github.com/jrlevine/grepcidr3
+https://gitlab.com/prips/prips
+
+Which together with generic grep, sort and diff can do what i want.
+
+# broken without above.
+
 Told runtime for VoIPBL voipbl.org/ on i5 is 7 seconds on openwrt 22.03 using nft.
 
 Works such that giving it a blank blocklist will remove all ip's from the ipset.
