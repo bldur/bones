@@ -197,7 +197,7 @@ cat "${blocklist_ipv4}" | GREP_CIDR_25_32 | while read line ; do
 done | grepcidr -vf "${cidr_ipv4_unmerge}" > "${single_ipv4}"
 cat "${cidr_ipv4_unmerge}" | while read line ;do
 	grepcidr $line "${cidr_ipv4_unmerge}"
-done | uniq -u | grepcidr -v  "${cidr_ipv4_unmerge}" > "${cidr_ipv4}"
+done | uniq -u > "${cidr_ipv4}"
 cat "${blocklist_ipv4}" | GREP_IPV4_NO_CIDR  >> "${single_ipv4}"
 
 # make a new file with diff, "add ip" and "delete ip", one line per ip with diff
