@@ -14,5 +14,7 @@ never flushes, adds and removes addresses.
 keeps last aggregated raw blocklist in /tmp/badhost
 
 has whitelist and support for logging addresses one want to be alerted about found in blocklists.
+where STONITH from not whitelisting an addresses on alert list.
+shoot the offending node in the head.
 
 failure to download will clear nft ipset.
