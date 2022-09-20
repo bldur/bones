@@ -1,6 +1,8 @@
 # bones
 # scripts and no fresh meat
 
+Still no go on silly netblocks after all...
+Why that went by silently, TBD.
 
 Works for openwrt 22.03 with these two programs:
 https://github.com/jrlevine/grepcidr3
