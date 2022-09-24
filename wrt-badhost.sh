@@ -39,6 +39,24 @@ https://ozgur.kazancci.com/ban-me.txt
 https://raw.githubusercontent.com/firehol/blocklist-ipsets/master/firehol_level3.netset
 "
 
+# create set to contain ip addresses
+if ! nft list set inet fw4 blackhole6 > /dev/null 2> /dev/null; then
+  nft add set inet fw4 blackhole { type ipv4_addr\; flags interval\; }
+  nft add set inet fw4 blackhole6 { type ipv6_addr\; flags interval\; }
+fi
+
+# insert chain to drop where source address in blackhole set
+if ! nft list chain inet fw4 input_wan | grep -q blackhole; then
+  nft insert rule inet fw4 input_wan ip saddr @blackhole reject
+  nft insert rule inet fw4 input_wan ip6 saddr @blackhole6 reject
+fi
+
+# temp folder and keep a few days
+export TMPDIR="/tmp/badhost/wrk"
+mkdir -p $TMPDIR
+#find $TMPDIR -type f -mtime +2 -delete
+
+# here begins populating ipsets inet fw4 blackhole and blackhole6
 
 GREP_IPV4() {
 	grep -E -o -- '((25[0-5]|(2[0-4]|1{0,1}[[:digit:]]){0,1}[[:digit:]])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[[:digit:]]){0,1}[[:digit:]])(/(3[0-2]|[1-2][[:digit:]]|[1-9]))?'
@@ -111,22 +129,6 @@ function readlines () {
 
 	
 
-# create set to contain ip addresses
-if ! nft list set inet fw4 blackhole6 > /dev/null 2> /dev/null; then
-  nft add set inet fw4 blackhole { type ipv4_addr\; flags interval\; }
-  nft add set inet fw4 blackhole6 { type ipv6_addr\; flags interval\; }
-fi
-
-# insert chain to drop where source address in blackhole set
-if ! nft list chain inet fw4 input_wan | grep -q blackhole; then
-  nft insert rule inet fw4 input_wan ip saddr @blackhole reject
-  nft insert rule inet fw4 input_wan ip6 saddr @blackhole6 reject
-fi
-
-# temp folder and keep a few days
-export TMPDIR="/tmp/badhost/wrk"
-mkdir -p $TMPDIR
-#find $TMPDIR -type f -mtime +2 -delete
 
 blocklist=$(mktemp -t blocklist.XXXXXX)
 
@@ -149,6 +151,7 @@ diff_single_ipv4=$(mktemp -t diff_single_ipv4.XXXXXX)
 diff_cidr_ipv4=$(mktemp -t diff_cidr_ipv4.XXXXXX)
 diff_input_nft_ipv4=$(mktemp -t diff_input_nft_ipv4.XXXXXX)
 diff_input_blocklist_ipv4=$(mktemp -t diff_input_blocklist_ipv4.XXXXXX)
+single_cidr_ipv4=$(mktemp -t single_cidr_ipv4.XXXXXX)
 
 #blocklist_ipv6=$(mktemp -p $TMPDIR)
 #diff_add_del_ipv6=$(mktemp -p $TMPDIR)
@@ -165,16 +168,9 @@ echo downloaded blocklists $(date)
 # get an ip list from the nft set
 #nft list set inet fw4 blackhole  > "${nft_ipv4}"
 #cat "${nft_ipv4}" | GREP_IPV4 | AWK_CIDR32 | GREP_IPV4_NO_CIDR | sort -u > "${nft_ipv4_list}"
-nft list set inet fw4 blackhole | GREP_IPV4 > "${nft_ipv4}"
+nft list set inet fw4 blackhole | GREP_V_COM | awk '$1=$1' RS="," OFS="\n" | GREP_IPV4 > "${nft_ipv4}"
 nft list set inet fw4 blackhole6 | GREP_V_COM | awk '$1=$1' RS="," OFS="\n" | GREP_IPV6 | sort -u > "${nft_ipv6_list}"
 
-# hmm
-cat "${nft_ipv4}" | GREP_IPV4 > "${nft_ipv4_list}"
-cat "${nft_ipv4_list}" | GREP_CIDR_0_24  > "${cidr_nft_ipv4}"
-cat "${nft_ipv4_list}" | GREP_CIDR_25_32 | while read line ; do
-	prips $line
-done > "${single_nft_ipv4}"
-cat "${nft_ipv4_list}" | GREP_IPV4_NO_CIDR >> "${single_nft_ipv4}"
 # just in case of auto-merge, hmm, two ipsets
 
 # check
@@ -191,14 +187,49 @@ if test -s "${WHITELIST_FILE}" ;then
 	else
 	cat "${blocklist}" | GREP_IPV4 | sort -u > "${blocklist_ipv4}"
 fi
-cat "${blocklist_ipv4}" | GREP_CIDR_0_24 > "${cidr_ipv4_unmerge}"
+
+# This function comes with quirks, creating a variable with inserted \n after ip.
+# used to loop over and find overlapping id addresses for second pass and removal.
+# don't know why first line is "N ip", and second line " N ip", but worked around.
+# asume it is for substring separation in string.
+sanitize_cidr() {
+
+file="$1"
+overlaps=""
+overlaps=$(cat $file | while read line ; do
+			echo "$(grepcidr -D $line $file | wc -l) $line\n"
+		done | sort -r)
+N=$(echo -e $overlaps | awk 'NR==1{print $1}')
+
+
+# start with lowest N cidr with overlaps to highest in case they are nested.
+for i in $(seq 2 $N) ; do
+	echo -e $overlaps | grep "$i\s" | awk '{print$2}' | while read line ;do
+		cidr_remove=$(grepcidr -D $line $file | sort -t "/" -k2 | tail -n+2 | sed -e 's/[]\/$*.^[]/\\&/g')
+		for i in $cidr_remove ;do
+			sed -i "/$i/d" $file
+		done
+	done
+
+done
+
+}
+#cat "${blocklist_ipv4}" | GREP_CIDR_0_24  > "${cidr_ipv4_unmerge}"
+cat "${blocklist_ipv4}" | GREP_CIDR_0_24 | sort -u  > "${cidr_ipv4}"
+sanitize_cidr "${cidr_ipv4}"
+
 cat "${blocklist_ipv4}" | GREP_CIDR_25_32 | while read line ; do
 	prips $line
-done | grepcidr -vf "${cidr_ipv4_unmerge}" > "${single_ipv4}"
-cat "${cidr_ipv4_unmerge}" | while read line ;do
-	grepcidr $line "${cidr_ipv4_unmerge}"
-done | uniq -u > "${cidr_ipv4}"
-cat "${blocklist_ipv4}" | GREP_IPV4_NO_CIDR  >> "${single_ipv4}"
+done | grepcidr -vf "${cidr_ipv4}"  > "${single_cidr_ipv4}"
+cat "${blocklist_ipv4}" | GREP_IPV4_NO_CIDR | grepcidr -vf "${cidr_ipv4}" > "${single_ipv4}"
+
+# hmm
+cat "${nft_ipv4}" | GREP_IPV4 > "${nft_ipv4_list}"
+cat "${nft_ipv4_list}" | GREP_CIDR_0_24  > "${cidr_nft_ipv4}"
+cat "${nft_ipv4_list}" | GREP_CIDR_25_32 | while read line ; do
+	prips $line
+done | grepcidr -vf "${cidr_nft_ipv4}" > "${single_nft_ipv4}"
+cat "${nft_ipv4_list}" | GREP_IPV4_NO_CIDR |  grepcidr -vf "${cidr_nft_ipv4}" >> "${single_nft_ipv4}"
 
 # make a new file with diff, "add ip" and "delete ip", one line per ip with diff
 #DIFFER "${single_nft_ipv4}" "${single_ipv4}"  > "${diff_single_ipv4}"
@@ -213,17 +244,17 @@ DIFFER "${nft_ipv6_list}" "${blocklist_ipv6}" > "${diff_add_del_ipv6}"
 
 # add and delete ipv4 for ipset
 echo Start of nft ipset operations $(date)
-grep add "${diff_add_del_ipv4}" | cut -d ' ' -f 2 | while batch=$(readlines 10000); do
-	echo $batch | awk '$1=$1' RS= OFS=", " | while read line ;do
-	nft add element inet fw4 blackhole { $line }
-	echo iteration of nft ipv4 add
-	done
-done
 grep del "${diff_add_del_ipv4}" | cut -d ' ' -f 2 | while batch=$(readlines 10000); do
         echo $batch | awk '$1=$1' RS= OFS=", " | while read line ;do
         nft delete element inet fw4 blackhole { $line }
 	echo iteration of nft ipv4 delete
         done
+done
+grep add "${diff_add_del_ipv4}" | cut -d ' ' -f 2 | while batch=$(readlines 10000); do
+	echo $batch | awk '$1=$1' RS= OFS=", " | while read line ;do
+	nft add element inet fw4 blackhole { $line }
+	echo iteration of nft ipv4 add
+	done
 done
 
 # add and del ipv6 from ipset
@@ -253,6 +284,7 @@ echo "ipv6 added: $(grep add "${diff_add_del_ipv6}" | wc -l)"
 echo "ipv6 removed: $(grep del "${diff_add_del_ipv6}" | wc -l)"
 
 if [ "$TMPDIR" = "/tmp/badhost/wrk" ]; then
-	rm -rf $TMPDIR
+#	rm -rf $TMPDIR
+nft list set inet fw4 blackhole | wc -l | echo "Done"
 fi
 # done!
