@@ -172,7 +172,7 @@ echo downloaded blocklists $(date)
 
 # just do this twice, once for ip ranges and prips convert them to CIDR.
 # something is weird with nft, as these ranges are never added.
-nft list set inet fw4 blackhole | GREP_V_COM | awk '$1=$1' RS="," OFS="\n" | GREP_IPV4 > "${nft_ipv4}"
+nft list set inet fw4 blackhole | GREP_V_COM | awk '$1=$1' RS="," OFS="\n" | grep -v "-" |GREP_IPV4 > "${nft_ipv4}"
 nft list set inet fw4 blackhole6 | GREP_V_COM | awk '$1=$1' RS="," OFS="\n" | GREP_IPV6 | sort -u > "${nft_ipv6_list}"
 
 # just in case of auto-merge, hmm, two ipsets
