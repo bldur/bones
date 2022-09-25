@@ -9,6 +9,7 @@
 # https://www.unix.com/shell-programming-and-scripting/233825-convert-ip-ranges-cidr-netblocks.html
 # https://www.geoghegan.ca/pfbadhost.html
 # copyleft, restrictions from above sources may apply.
+# and went BSD type from those choices.
 
 # only whitelisting ipv4 currently, don't have to overlap with alarm list.
 # shoot yourself, failure to download is the same as flushing ipset.
@@ -284,7 +285,7 @@ echo "ipv6 added: $(grep add "${diff_add_del_ipv6}" | wc -l)"
 echo "ipv6 removed: $(grep del "${diff_add_del_ipv6}" | wc -l)"
 
 if [ "$TMPDIR" = "/tmp/badhost/wrk" ]; then
-#	rm -rf $TMPDIR
+	rm -rf $TMPDIR
 nft list set inet fw4 blackhole | wc -l | echo "Done"
 fi
 # done!
