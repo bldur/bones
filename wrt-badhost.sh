@@ -237,7 +237,7 @@ cat "${nft_ipv4_list}" | grep -v "-" |GREP_IPV4_NO_CIDR |  grepcidr -vf "${cidr_
 # ip ranges can somehow make it into the nft ipset, remove them
 # thought to be an issue with auto-merge feature, can happen in interval sets
 
-cat "${nft_ipv4_list}" | GREP_IPV4_RANGE_NO_CIDR | while batch=$(readlines 10000); do
+nft list set inet fw4 blackhole | GREP_IPV4_RANGE_NO_CIDR | while batch=$(readlines 10000); do
         echo $batch | awk '$1=$1' RS= OFS=", " | while read line ;do
         nft delete element inet fw4 blackhole { $line }
         echo delete ipv4 ranges from nft set
@@ -296,7 +296,8 @@ echo "ipv6 added: $(grep add "${diff_add_del_ipv6}" | wc -l)"
 echo "ipv6 removed: $(grep del "${diff_add_del_ipv6}" | wc -l)"
 
 if [ "$TMPDIR" = "/tmp/badhost/wrk" ]; then
-	rm -rf $TMPDIR
-nft list set inet fw4 blackhole | wc -l | echo "Done"
+#	rm -rf $TMPDIR
+	nft list set inet fw4 blackhole | wc -l
+	echo "wrt-badhost completed $(date)"
 fi
 # done!
