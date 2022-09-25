@@ -22,3 +22,6 @@ TODO:
 Making it pretty, separating bogon, cidr blocks and single ip in separate ipsets.
 Have now seen 224.0.0.0/3 be converted to an ip range, double sets would perhaps fool proof.
 And generally making things pretty.
+
+And must object the quirky things with nft ipset that does this:
+"224.0.0.0-255.255.255.255 }"
