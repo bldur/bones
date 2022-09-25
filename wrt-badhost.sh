@@ -169,6 +169,9 @@ echo downloaded blocklists $(date)
 # get an ip list from the nft set
 #nft list set inet fw4 blackhole  > "${nft_ipv4}"
 #cat "${nft_ipv4}" | GREP_IPV4 | AWK_CIDR32 | GREP_IPV4_NO_CIDR | sort -u > "${nft_ipv4_list}"
+
+# just do this twice, once for ip ranges and prips convert them to CIDR.
+# something is weird with nft, as these ranges are never added.
 nft list set inet fw4 blackhole | GREP_V_COM | awk '$1=$1' RS="," OFS="\n" | GREP_IPV4 > "${nft_ipv4}"
 nft list set inet fw4 blackhole6 | GREP_V_COM | awk '$1=$1' RS="," OFS="\n" | GREP_IPV6 | sort -u > "${nft_ipv6_list}"
 
@@ -296,8 +299,8 @@ echo "ipv6 added: $(grep add "${diff_add_del_ipv6}" | wc -l)"
 echo "ipv6 removed: $(grep del "${diff_add_del_ipv6}" | wc -l)"
 
 if [ "$TMPDIR" = "/tmp/badhost/wrk" ]; then
-#	rm -rf $TMPDIR
-	nft list set inet fw4 blackhole | wc -l
+	rm -rf $TMPDIR
+#	nft list set inet fw4 blackhole | wc -l
 	echo "wrt-badhost completed $(date)"
 fi
 # done!
