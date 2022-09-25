@@ -17,3 +17,8 @@ where STONITH from not whitelisting an addresses on alert list.
 shoot the offending node in the head.
 
 failure to download will clear nft ipset.
+
+TODO:
+Making it pretty, separating bogon, cidr blocks and single ip in separate ipsets.
+Have now seen 224.0.0.0/3 be converted to an ip range, double sets would perhaps fool proof.
+And generally making things pretty.
