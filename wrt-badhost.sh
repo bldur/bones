@@ -230,7 +230,9 @@ cat "${nft_ipv4_list}" | GREP_CIDR_0_24  > "${cidr_nft_ipv4}"
 cat "${nft_ipv4_list}" | GREP_CIDR_25_32 | while read line ; do
 	prips $line
 done | grepcidr -vf "${cidr_nft_ipv4}" > "${single_nft_ipv4}"
-cat "${nft_ipv4_list}" | GREP_IPV4_NO_CIDR |  grepcidr -vf "${cidr_nft_ipv4}" >> "${single_nft_ipv4}"
+# another one for the ip range quirk now frequent for me with 224.0.0.0/3
+# this is dodgy but fine after other rounds of grep regex.
+cat "${nft_ipv4_list}" | grep -v "-" |GREP_IPV4_NO_CIDR |  grepcidr -vf "${cidr_nft_ipv4}" >> "${single_nft_ipv4}"
 
 # ip ranges can somehow make it into the nft ipset, remove them
 # thought to be an issue with auto-merge feature, can happen in interval sets
