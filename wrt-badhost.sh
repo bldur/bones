@@ -232,6 +232,15 @@ cat "${nft_ipv4_list}" | GREP_CIDR_25_32 | while read line ; do
 done | grepcidr -vf "${cidr_nft_ipv4}" > "${single_nft_ipv4}"
 cat "${nft_ipv4_list}" | GREP_IPV4_NO_CIDR |  grepcidr -vf "${cidr_nft_ipv4}" >> "${single_nft_ipv4}"
 
+# ip ranges can somehow make it into the nft ipset, remove them
+# thought to be an issue with auto-merge feature, can happen in interval sets
+
+cat "${nft_ipv4_list}" | GREP_IPV4_RANGE_NO_CIDR | while batch=$(readlines 10000); do
+        echo $batch | awk '$1=$1' RS= OFS=", " | while read line ;do
+        nft delete element inet fw4 blackhole { $line }
+        echo delete ipv4 ranges from nft set
+        done
+done
 # make a new file with diff, "add ip" and "delete ip", one line per ip with diff
 #DIFFER "${single_nft_ipv4}" "${single_ipv4}"  > "${diff_single_ipv4}"
 #DIFFER "${cidr_nft_ipv4}" "${cidr_ipv4}"  > "${diff_cidr_ipv4}"
