@@ -25,3 +25,8 @@ And generally making things pretty.
 
 And must object the quirky things with nft ipset that does this:
 "224.0.0.0-255.255.255.255 }"
+
+So, BUGS:
+
+Depending on the mood of nftables ipset and whats in blocklists, it can delete 224.0.0.0-255.255.255.255 and add 224.0.0.0/3 every run of the script.
+It now deletes silently, and show the cidr address in the diff.
